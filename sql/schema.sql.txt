@@ -1,0 +1,156 @@
+echo "-- Criação das tabelas e inserção de dados
+USE ecommerce_db;
+
+-- Tabela Cliente
+CREATE TABLE IF NOT EXISTS Cliente (
+    ID INT PRIMARY KEY,
+    Nome VARCHAR(255),
+    Email VARCHAR(255),
+    TipoCliente ENUM('PF', 'PJ')
+);
+
+-- Tabela PessoaFisica
+CREATE TABLE IF NOT EXISTS PessoaFisica (
+    ClienteID INT PRIMARY KEY,
+    CPF VARCHAR(11),
+    FOREIGN KEY (ClienteID) REFERENCES Cliente(ID)
+);
+
+-- Tabela PessoaJuridica
+CREATE TABLE IF NOT EXISTS PessoaJuridica (
+    ClienteID INT PRIMARY KEY,
+    CNPJ VARCHAR(14),
+    FOREIGN KEY (ClienteID) REFERENCES Cliente(ID)
+);
+
+-- Tabela Fornecedor
+CREATE TABLE IF NOT EXISTS Fornecedor (
+    ID INT PRIMARY KEY,
+    Nome VARCHAR(255),
+    Email VARCHAR(255),
+    Telefone VARCHAR(20),
+    Endereco TEXT,
+    VendedorID INT,
+    FOREIGN KEY (VendedorID) REFERENCES Cliente(ID)
+);
+
+-- Tabela Produto
+CREATE TABLE IF NOT EXISTS Produto (
+    ID INT PRIMARY KEY,
+    Nome VARCHAR(255),
+    Descricao TEXT,
+    Preco DECIMAL(10, 2),
+    FornecedorID INT,
+    FOREIGN KEY (FornecedorID) REFERENCES Fornecedor(ID)
+);
+
+-- Tabela StatusPedido
+CREATE TABLE IF NOT EXISTS StatusPedido (
+    ID INT PRIMARY KEY,
+    Nome VARCHAR(255)
+);
+
+-- Tabela MetodoPagamento
+CREATE TABLE IF NOT EXISTS MetodoPagamento (
+    ID INT PRIMARY KEY,
+    Tipo VARCHAR(255),
+    Numero VARCHAR(255),
+    DataExpiracao DATE
+);
+
+-- Tabela Pedido
+CREATE TABLE IF NOT EXISTS Pedido (
+    ID INT PRIMARY KEY,
+    Data DATE,
+    DataEntrega DATE,
+    MotivoCancelamento TEXT,
+    ClienteID INT,
+    StatusID INT,
+    CodigoRastreio VARCHAR(255),
+    MetodoPagamentoID INT,
+    FOREIGN KEY (ClienteID) REFERENCES Cliente(ID),
+    FOREIGN KEY (StatusID) REFERENCES StatusPedido(ID),
+    FOREIGN KEY (MetodoPagamentoID) REFERENCES MetodoPagamento(ID)
+);
+
+-- Tabela ItemPedido
+CREATE TABLE IF NOT EXISTS ItemPedido (
+    ID INT PRIMARY KEY,
+    PedidoID INT,
+    ProdutoID INT,
+    Quantidade INT,
+    Subtotal DECIMAL(10, 2),
+    FOREIGN KEY (PedidoID) REFERENCES Pedido(ID),
+    FOREIGN KEY (ProdutoID) REFERENCES Produto(ID)
+);
+
+-- Tabela Estoque
+CREATE TABLE IF NOT EXISTS Estoque (
+    ProdutoID INT PRIMARY KEY,
+    Quantidade INT,
+    FOREIGN KEY (ProdutoID) REFERENCES Produto(ID)
+);
+
+-- Tabela Pagamento
+CREATE TABLE IF NOT EXISTS Pagamento (
+    ID INT PRIMARY KEY,
+    ClienteID INT,
+    Tipo VARCHAR(255),
+    Numero VARCHAR(255),
+    DataExpiracao DATE,
+    FOREIGN KEY (ClienteID) REFERENCES Cliente(ID)
+);
+
+-- Tabela Entrega
+CREATE TABLE IF NOT EXISTS Entrega (
+    ID INT PRIMARY KEY,
+    PedidoID INT,
+    Status VARCHAR(255),
+    CodigoRastreio VARCHAR(255),
+    FOREIGN KEY (PedidoID) REFERENCES Pedido(ID)
+);
+
+-- Inserção de dados na tabela Cliente
+INSERT INTO Cliente (ID, Nome, Email, TipoCliente) VALUES (1, 'João Silva', 'joao@example.com', 'PF')
+ON DUPLICATE KEY UPDATE Nome=VALUES(Nome), Email=VALUES(Email), TipoCliente=VALUES(TipoCliente);
+
+-- Inserção de dados na tabela PessoaFisica
+INSERT INTO PessoaFisica (ClienteID, CPF) VALUES (1, '12345678901')
+ON DUPLICATE KEY UPDATE CPF=VALUES(CPF);
+
+-- Inserção de dados na tabela Fornecedor
+INSERT INTO Fornecedor (ID, Nome, Email, Telefone, Endereco, VendedorID) VALUES (1, 'Fornecedor A', 'fornecedorA@example.com', '1234567890', 'Rua A, 123', NULL)
+ON DUPLICATE KEY UPDATE Nome=VALUES(Nome), Email=VALUES(Email), Telefone=VALUES(Telefone), Endereco=VALUES(Endereco), VendedorID=VALUES(VendedorID);
+
+-- Inserção de dados na tabela Produto
+INSERT INTO Produto (ID, Nome, Descricao, Preco, FornecedorID) VALUES (1, 'Produto A', 'Descrição do Produto A', 100.00, 1)
+ON DUPLICATE KEY UPDATE Nome=VALUES(Nome), Descricao=VALUES(Descricao), Preco=VALUES(Preco), FornecedorID=VALUES(FornecedorID);
+
+-- Inserção de dados na tabela StatusPedido
+INSERT INTO StatusPedido (ID, Nome) VALUES (1, 'Enviado')
+ON DUPLICATE KEY UPDATE Nome=VALUES(Nome);
+
+-- Inserção de dados na tabela MetodoPagamento
+INSERT INTO MetodoPagamento (ID, Tipo, Numero, DataExpiracao) VALUES (1, 'Cartão de Crédito', '1234567890123456', '2025-12-31')
+ON DUPLICATE KEY UPDATE Tipo=VALUES(Tipo), Numero=VALUES(Numero), DataExpiracao=VALUES(DataExpiracao);
+
+-- Inserção de dados na tabela Pedido
+INSERT INTO Pedido (ID, Data, DataEntrega, MotivoCancelamento, ClienteID, StatusID, CodigoRastreio, MetodoPagamentoID) VALUES (1, '2024-06-01', '2024-06-05', NULL, 1, 1, 'AB123456789BR', 1)
+ON DUPLICATE KEY UPDATE Data=VALUES(Data), DataEntrega=VALUES(DataEntrega), MotivoCancelamento=VALUES(MotivoCancelamento), ClienteID=VALUES(ClienteID), StatusID=VALUES(StatusID), CodigoRastreio=VALUES(CodigoRastreio), MetodoPagamentoID=VALUES(MetodoPagamentoID);
+
+-- Inserção de dados na tabela ItemPedido
+INSERT INTO ItemPedido (ID, PedidoID, ProdutoID, Quantidade, Subtotal) VALUES (1, 1, 1, 2, 200.00)
+ON DUPLICATE KEY UPDATE PedidoID=VALUES(PedidoID), ProdutoID=VALUES(ProdutoID), Quantidade=VALUES(Quantidade), Subtotal=VALUES(Subtotal);
+
+-- Inserção de dados na tabela Estoque
+INSERT INTO Estoque (ProdutoID, Quantidade) VALUES (1, 50)
+ON DUPLICATE KEY UPDATE Quantidade=VALUES(Quantidade);
+
+-- Inserção de dados na tabela Pagamento
+INSERT INTO Pagamento (ID, ClienteID, Tipo, Numero, DataExpiracao) VALUES (1, 1, 'Cartão de Crédito', '1234567890123456', '2025-12-31')
+ON DUPLICATE KEY UPDATE ClienteID=VALUES(ClienteID), Tipo=VALUES(Tipo), Numero=VALUES(Numero), DataExpiracao=VALUES(DataExpiracao);
+
+-- Inserção de dados na tabela Entrega
+INSERT INTO Entrega (ID, PedidoID, Status, CodigoRastreio) VALUES (1, 1, 'Enviado', 'AB123456789BR')
+ON DUPLICATE KEY UPDATE PedidoID=VALUES(PedidoID), Status=VALUES(Status), CodigoRastreio=VALUES(CodigoRastreio);
+" > sql/schema.sql
