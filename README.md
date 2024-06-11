@@ -52,7 +52,6 @@ BEFORE UPDATE ON Funcionario
 FOR EACH ROW
 BEGIN
     -- Lógica para atualização do salário base
-    -- Supondo que haja uma coluna 'SalarioBase' na tabela Funcionario
     SET NEW.SalarioBase = NEW.SalarioBase * 1.1; -- Aumento de 10%
 END$$
 DELIMITER ;
