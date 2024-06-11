@@ -1,3 +1,4 @@
+
 # Banco de Dados de Comércio Eletrônico
 
 Este repositório contém a estrutura de um banco de dados para um sistema de e-commerce. Inclui a criação de tabelas, inserção de dados de exemplo, consultas SQL e triggers para diversas operações.
@@ -18,6 +19,7 @@ O banco de dados possui as seguintes tabelas:
 - Estoque
 - Pagamento
 - Entrega
+- Funcionario (para colaboradores)
 
 ## Triggers
 
@@ -38,19 +40,19 @@ END$$
 DELIMITER ;
 ```
 
-### Atualização do Salário Base
+### Atualização do Salário Base de Colaboradores
 
 Para atualizar o salário base de colaboradores antes que uma atualização ocorra na tabela de colaboradores, foi criada uma trigger que ajusta o salário base.
 
 ```sql
--- Trigger para atualizar salário base
+-- Trigger para atualizar salário base de colaboradores
 DELIMITER $$
 CREATE TRIGGER before_update_colaborador
-BEFORE UPDATE ON Colaborador
+BEFORE UPDATE ON Funcionario
 FOR EACH ROW
 BEGIN
     -- Lógica para atualização do salário base
-    -- Supondo que haja uma coluna 'SalarioBase' na tabela Colaborador
+    -- Supondo que haja uma coluna 'SalarioBase' na tabela Funcionario
     SET NEW.SalarioBase = NEW.SalarioBase * 1.1; -- Aumento de 10%
 END$$
 DELIMITER ;
